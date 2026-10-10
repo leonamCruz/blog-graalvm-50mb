@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{post.titulo}} - Leonam Top</title>
+
+  <meta
+          name="description"
+          content="{{post.descricao}}">
+
+  <meta
+          name="robots"
+          content="index, follow">
+
+  <meta
+          name="author"
+          content="Leonam Top">
+
+  <link
+          rel="canonical"
+          href="{{post.url}}">
+
+  <meta
+          property="og:type"
+          content="article">
+
+  <meta
+          property="og:title"
+          content="{{post.titulo}}">
+
+  <meta
+          property="og:description"
+          content="{{post.descricao}}">
+
+  <meta
+          property="og:url"
+          content="{{post.url}}">
+
+  <meta
+          property="og:image"
+          content="{{post.imagem}}">
+
+  <meta
+          property="og:image:alt"
+          content="{{post.titulo}}">
+
+  <meta
+          property="og:site_name"
+          content="Leonam Top">
+
+  <meta
+          property="og:locale"
+          content="pt_BR">
+
+  <meta
+          property="article:published_time"
+          content="{{post.criadoEmIso}}">
+
+  <meta
+          name="twitter:card"
+          content="summary_large_image">
+
+  <meta
+          name="twitter:title"
+          content="{{post.titulo}}">
+
+  <meta
+          name="twitter:description"
+          content="{{post.descricao}}">
+
+  <meta
+          name="twitter:image"
+          content="{{post.imagem}}">
+
+  <script type="application/ld+json">
+    {{post.jsonLd}}
+  </script>
+
+  <link rel="stylesheet" href="/css/milligram.min.css">
+  <link rel="stylesheet" href="/css/site.css?v=e9b6f10868fd">
+
+  <link
+          rel="stylesheet"
+          href="/css/prism-tomorrow.min.css">
+
+  <link rel="icon" href="/img/jeff.webp">
+    <link rel="preload" href="/fonts/vt323-latin-043a60145af2.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container header-content">
+    <div>
+      <img src="/img/jeff.webp" alt="Jeff The Killer" width="25">
+      <a href="/" class="brand">Leonam Top</a>
+    </div>
+
+    <nav>
+      <a href="/">Início</a>
+      <a href="/arquivos">Arquivos</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <article class="post">
+
+    <header class="post-header">
+      <h1>{{post.titulo}}</h1>
+
+      <p class="post-date">
+        {{post.criadoEm}}
+      </p>
+    </header>
+
+    <img
+            class="post-cover"
+            fetchpriority="high"
+            src="{{post.capa}}"
+            alt="{{post.titulo}}">
+
+    <textarea id="post-markdown" hidden>{{post.markdown}}</textarea>
+
+    <div id="post-content" class="post-content"></div>
+
+  </article>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Leonam Top</p>
+  </div>
+</footer>
+
+<script src="/js/marked.umd.js"></script>
+<script src="/js/purify.min.js"></script>
+<script src="/js/prism.min.js"></script>
+<!-- Suporte para Bash (comandos linux) e Java (para seus códigos backend) -->
+<script src="/js/prism-java.min.js"></script>
+<script src="/js/prism-bash.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const markdownEl = document.getElementById("post-markdown");
+    const contentEl = document.getElementById("post-content");
+
+    if (!markdownEl || !contentEl) return;
+
+    try {
+      // 1. Converte o texto Markdown em HTML na tela
+      contentEl.innerHTML = DOMPurify.sanitize(marked.parse(markdownEl.value), {
+        USE_PROFILES: { html: true },
+        ALLOW_DATA_ATTR: false,
+        SANITIZE_NAMED_PROPS: true,
+        FORBID_TAGS: ["style", "form", "input", "button", "textarea"]
+      });
+
+      // 2. Procura blocos de código sem linguagem definida e coloca 'bash'
+      const codeBlocks = contentEl.querySelectorAll('pre code');
+      codeBlocks.forEach(function(block) {
+        let hasLanguage = false;
+
+        // Verifica as classes de forma segura
+        block.classList.forEach(function(cls) {
+          if (cls.startsWith('language-')) {
+            hasLanguage = true;
+          }
+        });
+
+        // Se o seu ``` não tiver nome na frente, vira linux/bash por padrão
+        if (!hasLanguage) {
+          block.classList.add('language-bash');
+        }
+      });
+
+      // 3. Manda o Prism pintar apenas os códigos dentro do post
+      Prism.highlightAllUnder(contentEl);
+
+    } catch (erro) {
+      console.error("Erro ao processar os códigos:", erro);
+      // Se algo explodir, pelo menos garante que o texto bruto apareça
+      contentEl.textContent = markdownEl.value;
+    }
+  });
+</script>
+</body>
+</html>

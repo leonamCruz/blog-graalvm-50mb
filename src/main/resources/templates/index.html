@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{{site.titulo}}</title>
+    <meta name="description" content="{{site.descricao}}">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Leonam Top">
+    <link rel="canonical" href="{{site.url}}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{site.titulo}}">
+    <meta property="og:description" content="{{site.descricao}}">
+    <meta property="og:url" content="{{site.url}}">
+    <meta property="og:image" content="{{site.imagem}}">
+    <meta property="og:image:alt" content="Leonam Top">
+    <meta property="og:site_name" content="Leonam Top">
+    <meta property="og:locale" content="pt_BR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{site.titulo}}">
+    <meta name="twitter:description" content="{{site.descricao}}">
+    <meta name="twitter:image" content="{{site.imagem}}">
+    <script type="application/ld+json">{{site.jsonLd}}</script>
+    <link rel="stylesheet" href="/css/milligram.min.css">
+    <link rel="stylesheet" href="/css/site.css?v=e9b6f10868fd">
+    <link rel="icon" href="/img/jeff.webp">
+    <link rel="preload" href="/fonts/vt323-latin-043a60145af2.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body>
+<header class="site-header">
+    <div class="container header-content">
+        <div><img src="/img/jeff.webp" alt="Jeff The Killer" width="25"><a href="/" class="brand">Leonam Top</a></div>
+        <nav aria-label="Navegação principal">
+            <a href="/">Início</a><a href="/arquivos">Arquivos</a>
+            <form id="busca-form" class="navbar-search" role="search" action="/buscar" method="get"
+                  hx-get="/buscar" hx-target="#resultados-busca" hx-swap="innerHTML"
+                  hx-trigger="submit, input changed delay:350ms from:#busca-q, search from:#busca-q"
+                  hx-sync="this:replace" hx-replace-url="true" hx-indicator="#busca-carregando">
+                <label for="busca-q" class="visually-hidden">Pesquisar nos posts</label>
+                <div class="search-controls">
+                    <input id="busca-q" type="search" name="q" maxlength="160"
+                           value="{{busca.valor}}" placeholder="Buscar posts…"
+                           autocomplete="off" aria-describedby="busca-ajuda">
+                    <button type="submit">Pesquisar</button>
+                </div>
+                <p id="busca-ajuda" class="visually-hidden">Título e conteúdo · acentos não fazem diferença · comece a digitar uma palavra.</p>
+                <span id="busca-carregando" class="htmx-indicator" role="status">Pesquisando…</span>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="retro-box intro">
+        <h1 id="terminal-title"></h1>
+        <p id="terminal-text"></p>
+    </section>
+
+    <section id="resultados-busca" class="retro-box search-section" aria-label="Resultados da pesquisa"
+             aria-live="polite" aria-atomic="true">{{busca.resultados}}</section>
+
+    <div class="row">
+        <section class="column column-75">
+            <div id="posts">
+                <h2>Posts recentes</h2>
+
+                <div class="carousel">
+                    <div class="carousel-track">
+                        {{#ultimosPosts}}
+                        <article class="post-card carousel-slide">
+                            <h3><a href="/blog/{{post.slug}}">{{post.titulo}}</a></h3>
+                            <img src="{{post.capa}}" alt="Capa do Post" {{post.prioridadeImagem}}>
+                            <p class="post-date">{{post.criadoEm}}</p>
+                            <a class="read-more" href="/blog/{{post.slug}}">Ler artigo →</a>
+                        </article>
+                        {{/ultimosPosts}}
+                    </div>
+
+                    <button type="button" class="carousel-button prev" aria-label="Post anterior" onclick="moverCarousel(-1)">‹</button>
+                    <button type="button" class="carousel-button next" aria-label="Próximo post" onclick="moverCarousel(1)">›</button>
+                </div>
+
+                <div class="carousel-indicators" id="carousel-indicators"></div>
+
+                <h2>Outros posts</h2>
+
+                <div id="outros-posts">
+                    <div class="post-grid">
+                        {{#posts}}
+                        <article class="post-card retro-box">
+                            <h3><a href="/blog/{{post.slug}}">{{post.titulo}}</a></h3>
+                            <img src="{{post.capa}}" alt="Capa do Post">
+                            <p class="post-date">{{post.criadoEm}}</p>
+                            <a class="read-more" href="/blog/{{post.slug}}">Ler artigo →</a>
+                        </article>
+                        {{/posts}}
+                    </div>
+
+                    <div class="pagination">{{paginacao}}</div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="column column-25">
+            <section class="retro-box">
+                <h3>Categorias</h3>
+                <ul class="category-list">
+                    <li><a href="/">Todas</a></li>
+                    {{#categorias}}
+                    <li><a href="/categoria/{{categoria.slug}}" hx-get="/categoria/{{categoria.slug}}" hx-target="#posts" hx-swap="innerHTML" hx-push-url="true">{{categoria.nome}}</a></li>
+                    {{/categorias}}
+                </ul>
+            </section>
+
+            <section class="retro-box">
+                <h3>Tags</h3>
+                <div class="tags">
+                    {{#tags}}
+                    <a href="/tag/{{tag.slug}}" hx-get="/tag/{{tag.slug}}" hx-target="#posts" hx-swap="innerHTML" hx-push-url="true">#{{tag.nome}}</a>
+                    {{/tags}}
+                </div>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>© Leonam Top</p>
+        <nav class="footer-links">
+            <a href="https://www.linkedin.com/in/leonamcruz" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://github.com/leonamCruz" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.youtube.com/@techanalogia" target="_blank" rel="noopener noreferrer">YouTube</a>
+        </nav>
+    </div>
+</footer>
+
+<script src="/js/htmx.min.js"></script>
+<script>
+    const terminalTitle=document.getElementById("terminal-title");
+    const terminalText=document.getElementById("terminal-text");
+    const title="Leonam Top";
+    const lines=[
+        "Desenvolvimento, Java, tecnologias e outras coisas que valem a pena registrar.",
+        "",
+        "Como diria Mufasa: Lembre-se de quem você é."
+    ];
+
+    let titleIndex=0,lineIndex=0,charIndex=0;
+
+    function criarCursor(element){
+        const cursor=document.createElement("span");
+        cursor.textContent="█";
+        cursor.className="terminal-cursor";
+        element.appendChild(cursor);
+        return cursor;
+    }
+
+    const titleCursor=criarCursor(terminalTitle);
+    const textCursor=criarCursor(terminalText);
+
+    function digitarTitulo(){
+        if(titleIndex<title.length){
+            titleCursor.before(document.createTextNode(title[titleIndex++]));
+            setTimeout(digitarTitulo,55);
+            return;
+        }
+
+        titleCursor.classList.add("blink");
+        digitarLinha();
+    }
+
+    function digitarLinha(){
+        if(lineIndex>=lines.length){
+            textCursor.classList.add("blink");
+            return;
+        }
+
+        const linha=lines[lineIndex];
+
+        if(charIndex<linha.length){
+            textCursor.before(document.createTextNode(linha[charIndex++]));
+            setTimeout(digitarLinha,35);
+            return;
+        }
+
+        if(lineIndex<lines.length-1){
+            textCursor.before(document.createElement("br"));
+        }
+
+        lineIndex++;
+        charIndex=0;
+        setTimeout(digitarLinha,35);
+    }
+
+    function ajustarTitulos(){
+        document.querySelectorAll(".post-card h3 a").forEach(link=>{
+            let tamanho=2.4;
+            link.style.fontSize=`${tamanho}rem`;
+
+            while(link.scrollWidth>link.clientWidth&&tamanho>1.3){
+                tamanho-=.1;
+                link.style.fontSize=`${tamanho}rem`;
+            }
+        });
+    }
+
+    digitarTitulo();
+
+    const track=document.querySelector(".carousel-track");
+    const slides=document.querySelectorAll(".carousel-slide");
+    const indicators=document.getElementById("carousel-indicators");
+    const carousel=document.querySelector(".carousel");
+
+    let slideAtual=0;
+    let carouselTimer=null;
+    let pausado=false;
+
+    slides.forEach((_,index)=>{
+        const indicador=document.createElement("button");
+        indicador.type="button";
+        indicador.className="carousel-indicator";
+        indicador.ariaLabel=`Ir para o post ${index+1}`;
+        indicador.onclick=()=>irParaSlide(index);
+        indicators.appendChild(indicador);
+    });
+
+    function atualizarCarousel(){
+        track.style.transform=`translateX(-${slideAtual*100}%)`;
+        document.querySelectorAll(".carousel-indicator").forEach((indicador,index)=>{
+            indicador.classList.toggle("active",index===slideAtual);
+        });
+    }
+
+    function agendarCarousel(){
+        clearTimeout(carouselTimer);
+        if(!pausado&&slides.length>1){
+            carouselTimer=setTimeout(()=>{
+                moverCarousel(1);
+            },3000);
+        }
+    }
+
+    function irParaSlide(index){
+        slideAtual=index;
+        atualizarCarousel();
+        ajustarTitulos();
+        agendarCarousel();
+    }
+
+    function moverCarousel(direcao){
+        slideAtual=(slideAtual+direcao+slides.length)%slides.length;
+        atualizarCarousel();
+        ajustarTitulos();
+        if(!pausado)agendarCarousel();
+    }
+
+    if(slides.length>0){
+        atualizarCarousel();
+        agendarCarousel();
+    }
+
+    ajustarTitulos();
+
+    carousel.addEventListener("mouseenter",()=>{
+        pausado=true;
+        clearTimeout(carouselTimer);
+    });
+
+    carousel.addEventListener("mouseleave",()=>{
+        pausado=false;
+        agendarCarousel();
+    });
+
+    window.addEventListener("resize",ajustarTitulos);
+</script>
+</body>
+</html>
