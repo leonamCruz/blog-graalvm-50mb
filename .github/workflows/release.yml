@@ -12,28 +12,66 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            artifact: blog-app-linux
+            executable: target/blog-app
+          - os: windows-latest
+            artifact: blog-app-windows.exe
+            executable: target/blog-app.exe
 
     steps:
-      - name: Baixar código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar GraalVM JDK 25
+      - name: Setup GraalVM JDK 25
         uses: graalvm/setup-graalvm@v1
         with:
           java-version: '25'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compilar executável nativo
+      - name: Build native executable
         run: mvn -B clean package
 
-      - name: Publicar Release
+      - name: Prepare executable
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "${{ matrix.executable }}" "dist/${{ matrix.artifact }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download executables
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Release v1.0.${{ github.run_number }}
           generate_release_notes: true
-          files: |
-            target/blog-app
           make_latest: true
+          files: |
+            dist/blog-app-linux
+            dist/blog-app-windows.exe
