@@ -17,7 +17,7 @@ public class StaticController extends BaseController {
         var caminho = exchange.getRequestURI().getPath();
 
         if (caminho.contains("..")) {
-            enviarResposta(exchange, 403, "Acesso negado");
+            enviarResposta(exchange, 403, "Acesso negado Trouxa");
             return;
         }
 
