@@ -11,8 +11,8 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build ${{ matrix.os }}
+  build-native:
+    name: Native ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -22,6 +22,11 @@ jobs:
           - os: ubuntu-24.04
             artifact: blog-app-linux
             executable: target/blog-app
+
+          - os: ubuntu-24.04-arm
+            artifact: blog-app-linux-arm64
+            executable: target/blog-app
+
           - os: windows-latest
             artifact: blog-app-windows.exe
             executable: target/blog-app.exe
@@ -36,9 +41,10 @@ jobs:
           java-version: '25'
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          cache: 'maven'
 
       - name: Build native executable
-        run: mvn -B clean package
+        run: mvn -B clean package -Pnative
 
       - name: Prepare executable
         shell: bash
@@ -46,20 +52,52 @@ jobs:
           mkdir -p dist
           cp "${{ matrix.executable }}" "dist/${{ matrix.artifact }}"
 
-      - name: Upload build artifact
+      - name: Upload native artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: dist/${{ matrix.artifact }}
           if-no-files-found: error
 
-  release:
-    name: Publish GitHub Release
-    needs: build
+  build-jar:
+    name: Build Executable JAR
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Download executables
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'maven'
+
+      - name: Build fat JAR
+        run: mvn -B clean package -Pjar
+
+      - name: Prepare JAR
+        run: |
+          mkdir -p dist
+          cp target/BlogSimples-1.jar dist/blog-app.jar
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blog-app-jar
+          path: dist/blog-app.jar
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - build-native
+      - build-jar
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: dist
@@ -74,4 +112,6 @@ jobs:
           make_latest: true
           files: |
             dist/blog-app-linux
+            dist/blog-app-linux-arm64
             dist/blog-app-windows.exe
+            dist/blog-app.jar
