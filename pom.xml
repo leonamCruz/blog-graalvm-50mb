@@ -1,4 +1,30 @@
 
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>top.leonam</groupId>
+    <artifactId>BlogSimples</artifactId>
+    <version>1</version>
+
+    <properties>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.53.4.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <!-- Compilador Java 25 -->
@@ -15,12 +41,15 @@
     </build>
 
     <profiles>
-        <!-- BUILD NATIVO: Linux, Windows e ARM64 -->
+
+        <!-- BUILD NATIVO: LINUX, WINDOWS E ARM64 -->
         <profile>
             <id>native</id>
+
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+
             <build>
                 <plugins>
                     <plugin>
@@ -28,6 +57,7 @@
                         <artifactId>native-maven-plugin</artifactId>
                         <version>0.10.2</version>
                         <extensions>true</extensions>
+
                         <executions>
                             <execution>
                                 <id>build-native</id>
@@ -37,11 +67,12 @@
                                 </goals>
                             </execution>
                         </executions>
+
                         <configuration>
                             <imageName>blog-app</imageName>
                             <mainClass>top.leonam.Main</mainClass>
 
-                            <!-- Metadados para SQLite -->
+                            <!-- Metadados SQLite -->
                             <metadataRepository>
                                 <enabled>true</enabled>
                             </metadataRepository>
@@ -58,15 +89,17 @@
             </build>
         </profile>
 
-        <!-- BUILD JAR: Executável com dependências -->
+        <!-- BUILD JAR EXECUTAVEL COM DEPENDENCIAS -->
         <profile>
             <id>jar</id>
+
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
                         <version>3.6.2</version>
+
                         <executions>
                             <execution>
                                 <id>build-jar</id>
@@ -74,8 +107,10 @@
                                 <goals>
                                     <goal>shade</goal>
                                 </goals>
+
                                 <configuration>
                                     <createDependencyReducedPom>false</createDependencyReducedPom>
+
                                     <filters>
                                         <filter>
                                             <artifact>*:*</artifact>
@@ -86,8 +121,10 @@
                                             </excludes>
                                         </filter>
                                     </filters>
+
                                     <transformers>
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+
                                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                             <mainClass>top.leonam.Main</mainClass>
                                         </transformer>
@@ -99,5 +136,7 @@
                 </plugins>
             </build>
         </profile>
+
     </profiles>
+
 </project>
